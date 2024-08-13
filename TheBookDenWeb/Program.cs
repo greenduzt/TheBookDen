@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using TheBookDenWeb.Data;
+using TheBookDen.DataAccess.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

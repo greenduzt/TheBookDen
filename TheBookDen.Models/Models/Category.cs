@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace TheBookDenWeb.Models;
+namespace TheBookDen.Models.Models;
 
 public class Category
 {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TheBookDenWeb.Data;
-using TheBookDenWeb.Models;
+using TheBookDen.DataAccess.Data;
+using TheBookDen.Models.Models;
 
 namespace TheBookDenWeb.Controllers;
 

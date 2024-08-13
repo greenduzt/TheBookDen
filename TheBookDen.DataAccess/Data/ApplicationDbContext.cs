@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TheBookDenWeb.Models;
+using TheBookDen.Models.Models;
 
-namespace TheBookDenWeb.Data;
+namespace TheBookDen.DataAccess.Data;
 public class ApplicationDbContext : DbContext
 {
     public DbSet<Category> Categories { get; set; }
