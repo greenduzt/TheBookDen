@@ -1,20 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TheBookDen.DataAccess.Data;
+using TheBookDen.DataAccess.Repository.IRepository;
 using TheBookDen.Models.Models;
 
 namespace TheBookDenWeb.Controllers;
 
 public class CategoryController : Controller
 {
-    private readonly ApplicationDbContext _db;
-    public CategoryController(ApplicationDbContext db)
+    private readonly ICategoryRepository _categoryRepo;
+    public CategoryController(ICategoryRepository categoryRepo)
     {
-        _db = db;
+        _categoryRepo = categoryRepo;
     }
 
     public IActionResult Index()
     {
-        List<Category> categoryList = _db.Categories.ToList();   
+        List<Category> categoryList = _categoryRepo.GetAll().ToList();   
 
         return View(categoryList);
     }
@@ -33,8 +34,8 @@ public class CategoryController : Controller
 
         if (ModelState.IsValid)
         {
-            _db.Categories.Add(category);
-            _db.SaveChanges();
+            _categoryRepo.Add(category);
+            _categoryRepo.Save();
             TempData["success"] = "Category created successfully!";
             return RedirectToAction("Index");
         }
@@ -48,7 +49,7 @@ public class CategoryController : Controller
             return NotFound();
         }
 
-        Category? category = _db.Categories.Find(id);
+        Category? category = _categoryRepo.Get(x=>x.Id == id);
         //Category? category2 = _db.Categories.Where(x=>x.Id == id).FirstOrDefault();
         //Category? category3 = _db.Categories.FirstOrDefault(x=>x.Id == id);
 
@@ -67,8 +68,8 @@ public class CategoryController : Controller
 
         if (ModelState.IsValid)
         {
-            _db.Categories.Update(category);
-            _db.SaveChanges();
+            _categoryRepo.Update(category);
+            _categoryRepo.Save();
             TempData["success"] = "Category updated successfully!";
             return RedirectToAction("Index");
         }
@@ -83,7 +84,7 @@ public class CategoryController : Controller
             return NotFound();
         }
 
-        Category? category = _db.Categories.Find(id);        
+        Category? category = _categoryRepo.Get(x=>x.Id ==id);        
 
         if (category == null)
         {
@@ -96,14 +97,14 @@ public class CategoryController : Controller
     public IActionResult DeletePOST(int? id)
     {
 
-        Category? category = _db.Categories.Find(id);
+        Category? category = _categoryRepo.Get(x=>x.Id==id);
         if (category == null)
         {
             return NotFound();
         }
 
-        _db.Categories.Remove(category);
-        _db.SaveChanges();
+        _categoryRepo.Remove(category);
+        _categoryRepo.Save();
         TempData["success"] = "Category deleted successfully!";
         return RedirectToAction("Index");
     }
