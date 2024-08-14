@@ -18,6 +18,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TheBookDen.DataAccess\TheBookDen.DataAccess.csproj" />
+    <ProjectReference Include="..\TheBookDen.Models\TheBookDen.Models.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\images\product\" />
   </ItemGroup>
 
 </Project>
