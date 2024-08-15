@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using TheBookDen.DataAccess.Repository.IRepository;
 using TheBookDen.Models.Models;
 using TheBookDen.Models.ViewModels;
@@ -19,7 +20,7 @@ public class ProductController : Controller
 
     public IActionResult Index()
     {
-        List<Product> productList = _unitOfWork.ProductRepository.GetAll().ToList();
+        List<Product> productList = _unitOfWork.ProductRepository.GetAll(includeProperties:"Category").ToList();
 
         return View(productList);
     }
@@ -62,6 +63,19 @@ public class ProductController : Controller
             {
                 string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
                 string productPath = Path.Combine(wwwRootPath, @"images\product");
+
+                if (!string.IsNullOrEmpty(productVm.Product.ImageUrl))
+                {
+                    //delete the old image
+                    var oldImagePath =
+                        Path.Combine(wwwRootPath, productVm.Product.ImageUrl.TrimStart('\\'));
+
+                    if (System.IO.File.Exists(oldImagePath))
+                    {
+                        System.IO.File.Delete(oldImagePath);
+                    }
+                }
+
                 using (var fileStream = new FileStream(Path.Combine(productPath,fileName),FileMode.Create))
                 {
                     file.CopyTo(fileStream);
@@ -70,7 +84,15 @@ public class ProductController : Controller
                 productVm.Product.ImageUrl = @"\images\product\" + fileName;
             }
 
-            _unitOfWork.ProductRepository.Add(productVm.Product );
+            if (productVm.Product.Id == 0)
+            {
+                _unitOfWork.ProductRepository.Add(productVm.Product);
+            }
+            else
+            {
+                _unitOfWork.ProductRepository.Update(productVm.Product);
+            }
+
             _unitOfWork.Save();
             TempData["success"] = "Product created successfully!";
             return RedirectToAction("Index");
@@ -89,35 +111,37 @@ public class ProductController : Controller
        
     }
     
+   
+
+    #region API calls
+    [HttpGet]
+    public IActionResult GetAll()
+    {
+        List<Product> productList = _unitOfWork.ProductRepository.GetAll(includeProperties: "Category").ToList();
+        return Json(new { data = productList });
+    }
+
+    [HttpDelete]
     public IActionResult Delete(int? id)
     {
-        if (id == null || id == 0)
+        var productToBeDeleted = _unitOfWork.ProductRepository.Get(x=>x.Id==id);
+        if (productToBeDeleted == null)
         {
-            return NotFound();
+            return Json(new {success = false, Message = "Error while deleting"});
         }
 
-        Product? product = _unitOfWork.ProductRepository.Get(x => x.Id == id);
+        var oldImagePath =
+                        Path.Combine(_webHostEnvironment.WebRootPath, productToBeDeleted.ImageUrl.TrimStart('\\'));
 
-        if (product == null)
+        if (System.IO.File.Exists(oldImagePath))
         {
-            return NotFound();
+            System.IO.File.Delete(oldImagePath);
         }
 
-        return View(product);
-    }
-    [HttpPost, ActionName("Delete")]
-    public IActionResult DeletePOST(int? id)
-    {
-
-        Product? product = _unitOfWork.ProductRepository.Get(x => x.Id == id);
-        if (product == null)
-        {
-            return NotFound();
-        }
-
-        _unitOfWork.ProductRepository.Remove(product);
+        _unitOfWork.ProductRepository.Remove(productToBeDeleted);
         _unitOfWork.Save();
-        TempData["success"] = "Product deleted successfully!";
-        return RedirectToAction("Index");
+        
+        return Json(new { success=true, message = "Delete Successful" });
     }
+    #endregion
 }
