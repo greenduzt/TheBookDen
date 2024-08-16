@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TheBookDen.DataAccess.Data;
 using TheBookDen.DataAccess.Repository.IRepository;
 using TheBookDen.Models.Models;
+using TheBookDen.Utility;
 
 namespace TheBookDenWeb.Areas.Admin.Controllers;
 
 [Area("Admin")]
+[Authorize(Roles = StaticDetails.Role_Admin)]
 public class CategoryController : Controller
 {
     private readonly IUnitOfWork _unitOfWork;
