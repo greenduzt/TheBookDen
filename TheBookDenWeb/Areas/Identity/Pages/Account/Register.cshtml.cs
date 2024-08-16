@@ -19,11 +19,13 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using TheBookDen.Models.Models;
+using TheBookDen.Utility;
 
 namespace TheBookDenWeb.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
     {
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IUserStore<IdentityUser> _userStore;
@@ -36,7 +38,8 @@ namespace TheBookDenWeb.Areas.Identity.Pages.Account
             IUserStore<IdentityUser> userStore,
             SignInManager<IdentityUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -44,6 +47,7 @@ namespace TheBookDenWeb.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _roleManager = roleManager;
         }
 
         /// <summary>
@@ -103,6 +107,15 @@ namespace TheBookDenWeb.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null)
         {
+
+            if(! await _roleManager.RoleExistsAsync(StaticDetails.Role_Customer))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(StaticDetails.Role_Customer));
+                await _roleManager.CreateAsync(new IdentityRole(StaticDetails.Role_Employee));
+                await _roleManager.CreateAsync(new IdentityRole(StaticDetails.Role_Admin));
+                await _roleManager.CreateAsync(new IdentityRole(StaticDetails.Role_Company));
+            }
+
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
